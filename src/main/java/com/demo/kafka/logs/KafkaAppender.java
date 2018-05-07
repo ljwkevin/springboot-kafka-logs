@@ -3,9 +3,9 @@ package com.demo.kafka.logs;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -62,34 +62,35 @@ public class KafkaAppender<E> extends AppenderBase<E> {
 		String msg = layout.doLayout(event);
 		ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(getTopicName(), msg);
 		System.out.println("[推送数据]:{}" + producerRecord);
-		// Future<RecordMetadata> future = producer.send(producerRecord);
-		// try {
-		// // Object obj = future.get(0, TimeUnit.MILLISECONDS);//1ms内没有任何响应就直接写入文本文件
-		// Object obj = future.get();
-		// if (future.isDone()) {
-		// System.out.println("响应结果:" + obj.toString());
-		// System.out.println("推送数据到kafka成功");
-		// }
-		// } catch (Exception e) {
-		// log.info("推送异常:{}", e.getMessage());
-		// }
-
-		producer.send(producerRecord, new Callback() {
-			@Override
-			public void onCompletion(RecordMetadata metadata, Exception exception) {
-				if (exception != null) {
-					if (logToLocal) {
-						log.info("[push to kafka]:{}", producerRecord);
-						log.info("[push failed]:{}", exception.getMessage());
-					}
-					exception.printStackTrace();
-				}
-				System.out.println("[推送数据到kafka成功]:" + metadata.toString());
-				if (logToLocal) {
-					log.info("[推送数据到kafka成功]:{}", metadata);
-				}
+		Future<RecordMetadata> future = producer.send(producerRecord);
+		try {
+			// Object obj = future.get(0, TimeUnit.MILLISECONDS);//1ms内没有任何响应就直接写入文本文件
+			Object obj = future.get();
+			if (future.isDone()) {
+				System.out.println("响应结果:" + obj.toString());
+				System.out.println("推送数据到kafka成功");
 			}
-		});
+		} catch (Exception e) {
+			log.info("推送异常:{}", e.getMessage());
+		}
+
+		// producer.send(producerRecord, new Callback() {
+		// @Override
+		// public void onCompletion(RecordMetadata metadata, Exception exception) {
+		// if (exception != null) {
+		// if (logToLocal) {
+		// log.info("[push to kafka]:{}", producerRecord);
+		// log.info("[push failed]:{}", exception.getMessage());
+		// }
+		// exception.printStackTrace();
+		// }else {
+		// System.out.println("[推送数据到kafka成功]:" + metadata);
+		// if (logToLocal) {
+		// log.info("[推送数据到kafka成功]:{}", metadata);
+		// }
+		// }
+		// }
+		// });
 	}
 
 	public Layout<E> getLayout() {

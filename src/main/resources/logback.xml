@@ -35,7 +35,7 @@
 		<!--日志文件最大的大小 -->
 		<triggeringPolicy
 			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>10MB</MaxFileSize>
+			<MaxFileSize>100MB</MaxFileSize>
 		</triggeringPolicy>
 	</appender>
 
@@ -44,8 +44,7 @@
 	<appender name="KAFKA-EVENTS"
 		class="com.demo.kafka.logs.KafkaAppender">
 		<kafkaProducerProperties>
-			bootstrap.servers=kafka.server.name1:9092,kafka.server.name2:9092
-			retries=3
+			bootstrap.servers=localhost:9092
 			value.serializer=org.apache.kafka.common.serialization.StringSerializer
 			key.serializer=org.apache.kafka.common.serialization.StringSerializer
 			acks=1
@@ -82,7 +81,7 @@
 		<triggeringPolicy
 			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<!-- 文件大小触发重写新文件 -->
-			<MaxFileSize>100MB</MaxFileSize>
+			<MaxFileSize>500MB</MaxFileSize>
 			<!-- <totalSizeCap>10GB</totalSizeCap> -->
 		</triggeringPolicy>
 		<encoder>
