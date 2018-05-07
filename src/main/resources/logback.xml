@@ -44,7 +44,7 @@
 	<appender name="KAFKA-EVENTS"
 		class="com.demo.kafka.logs.KafkaAppender">
 		<kafkaProducerProperties>
-			bootstrap.servers=kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092
+			bootstrap.servers=kafka.server.name1:9092,kafka.server.name2:9092
 			retries=3
 			value.serializer=org.apache.kafka.common.serialization.StringSerializer
 			key.serializer=org.apache.kafka.common.serialization.StringSerializer
