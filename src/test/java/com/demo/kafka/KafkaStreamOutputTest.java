@@ -32,12 +32,12 @@ public class KafkaStreamOutputTest {
 		props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
 		final KStreamBuilder builder = new KStreamBuilder();
-		builder.stream(KafkaProducerTest.TOPIC_NAME).flatMapValues(new ValueMapper<Object, Iterable<String>>() {
+		builder.stream(KafkaConfigUtils.DEFAULT_TOPIC_NAME).flatMapValues(new ValueMapper<Object, Iterable<String>>() {
 			@Override
 			public Iterable<String> apply(Object value) {
 				return Arrays.asList(value.toString().toUpperCase(Locale.getDefault()).split("\\W+"));
 			}
-		}).to(KafkaProducerTest.TOPIC_NAME);
+		}).to(KafkaConfigUtils.DEFAULT_TOPIC_NAME);
 
 		final KafkaStreams streams = new KafkaStreams(builder, props);
 		final CountDownLatch latch = new CountDownLatch(1);

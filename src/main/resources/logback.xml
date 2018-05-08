@@ -41,14 +41,6 @@
 	<!-- 业务日志：写入kafka -->
 	<appender name="KAFKA-EVENTS"
 		class="com.demo.kafka.logs.KafkaAppender">
-		<kafkaProducerProperties>
-			bootstrap.servers=kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092
-			value.serializer=org.apache.kafka.common.serialization.StringSerializer
-			key.serializer=org.apache.kafka.common.serialization.StringSerializer
-			acks=1
-			<!--auto.create.topics.enable=true -->
-			<!--reconnect.backoff.ms=1 acks=all -->
-		</kafkaProducerProperties>
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<pattern>%msg</pattern>
 		</layout>
@@ -78,7 +70,7 @@
 		<triggeringPolicy
 			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<!-- 文件大小触发重写新文件 -->
-			<MaxFileSize>500MB</MaxFileSize>
+			<MaxFileSize>100MB</MaxFileSize>
 			<!-- <totalSizeCap>10GB</totalSizeCap> -->
 		</triggeringPolicy>
 		<encoder>
@@ -104,7 +96,7 @@
 	</root>
 	<logger name="org.apache.kafka" level="DEBUG">
 	</logger>
-	<logger name="org.apache.zookeeper" level="INFO">
+	<logger name="org.apache.zookeeper" level="DEBUG">
 	</logger>
 
 </configuration>

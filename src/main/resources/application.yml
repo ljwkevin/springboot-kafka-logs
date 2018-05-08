@@ -1,7 +1,6 @@
 spring:
   application:
     name: springboot-kafka-logs
-logback:
-  filename:
-    applogs:  app
-    eventlogs: event_loss_data
+zk:
+  servers:
+    url: localhost

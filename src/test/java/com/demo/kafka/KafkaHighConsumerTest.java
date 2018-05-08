@@ -3,10 +3,7 @@ package com.demo.kafka;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
@@ -29,27 +26,14 @@ import kafka.javaapi.consumer.ConsumerConnector;
  */
 public class KafkaHighConsumerTest {
 
-	private static ConsumerConnector createConsumer() {
-		Properties props = new Properties();
-		// properties.put("zookeeper.connect",
-		// "zk1.dev.tuboshi.co:2181,zk2.dev.tuboshi.co:2181,zk3.dev.tuboshi.co:2181");
-		props.put("zookeeper.connect", "localhost:2181");
-		props.put("offsets.storage", "zookeeper");
-		props.put("auto.offset.reset", "largest");
-		props.put("auto.commit.enable", "true");
-		props.put("auto.commit.interval.ms", "2000");
-		props.put("group.id", "myGroup1");
-		return Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
-
-	}
-
 	public static void main(String[] args) {
 		int msgCount = 0;
 		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-		topicCountMap.put(KafkaProducerTest.TOPIC_NAME, 1);
-		ConsumerConnector consumer = createConsumer();
+		topicCountMap.put(KafkaConfigUtils.DEFAULT_TOPIC_NAME, 1);
+		String zkServersUrl = "zk1.test.tuboshi.co:2181,zk2.test.tuboshi.co:2181,zk3.test.tuboshi.co:2181";
+		ConsumerConnector consumer = KafkaConfigUtils.createHighConsumer(zkServersUrl);
 		Map<String, List<KafkaStream<byte[], byte[]>>> messageSteam = consumer.createMessageStreams(topicCountMap);
-		KafkaStream<byte[], byte[]> steam = messageSteam.get(KafkaProducerTest.TOPIC_NAME).get(0);
+		KafkaStream<byte[], byte[]> steam = messageSteam.get(KafkaConfigUtils.DEFAULT_TOPIC_NAME).get(0);
 		ConsumerIterator<byte[], byte[]> iterator = steam.iterator();
 		while (iterator.hasNext()) {
 			String message = new String(iterator.next().message());

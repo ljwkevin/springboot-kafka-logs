@@ -2,12 +2,12 @@ package com.demo.kafka;
 
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.demo.kafka.api.LogsToKafkaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,15 +15,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping("ubt")
 public class UbtCtrl {
 
-	private static final Logger log = LoggerFactory.getLogger("kafka-event");
-
 	private static final ObjectMapper mapper = new ObjectMapper();
+
+	@Autowired
+	private LogsToKafkaService LogsToKafkaService;
 
 	@GetMapping("/dowork")
 	public void login() {
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
-				log.info(mapper.writeValueAsString(new TempEvent(UUID.randomUUID().toString(), i + "")));
+				LogsToKafkaService
+						.produce(mapper.writeValueAsString(new TempEvent(UUID.randomUUID().toString(), i + "")));
 			} catch (JsonProcessingException e) {
 			}
 		}

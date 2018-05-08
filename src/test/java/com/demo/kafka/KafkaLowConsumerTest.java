@@ -49,7 +49,7 @@ public class KafkaLowConsumerTest {
 
 		Properties props = new Properties();
 		KafkaConsumer<String, String> consumer = getKafkaConsumer(props, false);
-		consumer.subscribe(Arrays.asList(KafkaProducerTest.TOPIC_NAME));
+		consumer.subscribe(Arrays.asList(KafkaConfigUtils.DEFAULT_TOPIC_NAME));
 		try {
 			while (true) {
 				ConsumerRecords<String, String> records = consumer.poll(100);
