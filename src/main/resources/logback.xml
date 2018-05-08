@@ -2,28 +2,26 @@
 <configuration>
 	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
 	<property name="LOG_HOME" value="logs" />
-	<!-- 系统日志目录和日志文件名前缀 -->
 	<property name="SYS_NAME" value="system" />
-	<!-- 数据日志目录和日志文件名前缀 -->
 	<property name="DATA_NAME" value="data" />
-	<property name="APP_NAME" value="ubt_kafka" />
-	<property name="EVENT_NAME" value="event_tdata" />
+	<property name="APP_LOGS_FILENAME" value="app" />
+	<property name="EVENT_LOGS_FILENAME" value="event_loss_data" />
+   <!--  <springProperty scope="context" name="APP_LOGS_FILENAME" source="logback.filename.applogs"/>
+    <springProperty scope="context" name="EVENT_LOGS_FILENAME" source="logback.filename.eventlogs"/> -->
 
-	<!-- 控制台输出 -->
 	<appender name="CONSOLE"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<pattern>[%d] [%-5level] [%thread] [%logger] - %msg%n</pattern>
 		</layout>
 	</appender>
-
-	<!-- 系统日志：按照每天生成日志文件 -->
+	
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!--日志文件输出的文件名 -->
-			<FileNamePattern>${LOG_HOME}/${SYS_NAME}/${APP_NAME}.%d{yyyy-MM-dd}.log
+			<FileNamePattern>${LOG_HOME}/${SYS_NAME}/${APP_LOGS_FILENAME}.%d{yyyy-MM-dd}.log
 			</FileNamePattern>
 			<!--日志文件保留天数 -->
 			<MaxHistory>10</MaxHistory>
@@ -44,23 +42,22 @@
 	<appender name="KAFKA-EVENTS"
 		class="com.demo.kafka.logs.KafkaAppender">
 		<kafkaProducerProperties>
-			bootstrap.servers=localhost:9092
+			bootstrap.servers=kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092
 			value.serializer=org.apache.kafka.common.serialization.StringSerializer
 			key.serializer=org.apache.kafka.common.serialization.StringSerializer
 			acks=1
 			<!--auto.create.topics.enable=true -->
 			<!--reconnect.backoff.ms=1 acks=all -->
 		</kafkaProducerProperties>
-		<logToLocal>true</logToLocal>
 		<layout class="ch.qos.logback.classic.PatternLayout">
-			<!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread] %logger{36} 
-				[%file : %line] %msg</pattern> -->
 			<pattern>%msg</pattern>
 		</layout>
 	</appender>
 
 	<appender name="ASYNC-KAFKA-EVENTS"
 		class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<queueSize>2048</queueSize>
 		<appender-ref ref="KAFKA-EVENTS" />
 	</appender>
 
@@ -73,7 +70,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"><!-- 基于时间的策略 -->
-			<fileNamePattern>${LOG_HOME}/${DATA_NAME}/${EVENT_NAME}.%d{yyyy-MM-dd}.log
+			<fileNamePattern>${LOG_HOME}/${DATA_NAME}/${EVENT_LOGS_FILENAME}.%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 			<!-- 日志文件保留天数 -->
 			<MaxHistory>10</MaxHistory>
@@ -91,7 +88,6 @@
 	</appender>
 	<appender name="ASYNC-LOCAL"
 		class="ch.qos.logback.classic.AsyncAppender">
-		<!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
 		<discardingThreshold>0</discardingThreshold>
 		<queueSize>2048</queueSize>
 		<appender-ref ref="LOCAL" />
@@ -102,7 +98,6 @@
 		<appender-ref ref="ASYNC-LOCAL" />
 	</logger>
 
-	<!-- 系统日志输出级别 -->
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />

@@ -29,8 +29,6 @@ import kafka.javaapi.consumer.ConsumerConnector;
  */
 public class KafkaHighConsumerTest {
 
-	private static final String TOPIC_NAME = "_vencano_2018_05_07";
-
 	private static ConsumerConnector createConsumer() {
 		Properties props = new Properties();
 		// properties.put("zookeeper.connect",
@@ -48,10 +46,10 @@ public class KafkaHighConsumerTest {
 	public static void main(String[] args) {
 		int msgCount = 0;
 		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-		topicCountMap.put(TOPIC_NAME, 1);
+		topicCountMap.put(KafkaProducerTest.TOPIC_NAME, 1);
 		ConsumerConnector consumer = createConsumer();
 		Map<String, List<KafkaStream<byte[], byte[]>>> messageSteam = consumer.createMessageStreams(topicCountMap);
-		KafkaStream<byte[], byte[]> steam = messageSteam.get(TOPIC_NAME).get(0);
+		KafkaStream<byte[], byte[]> steam = messageSteam.get(KafkaProducerTest.TOPIC_NAME).get(0);
 		ConsumerIterator<byte[], byte[]> iterator = steam.iterator();
 		while (iterator.hasNext()) {
 			String message = new String(iterator.next().message());

@@ -1,14 +1,13 @@
 package com.demo.kafka;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 
 /**
@@ -23,23 +22,33 @@ import org.apache.kafka.common.TopicPartition;
  */
 public class KafkaLowConsumerTest {
 
-	private static KafkaConsumer<String, String> getKafkaConsumer(Properties props) {
-		props.put("bootstrap.servers", "localhost:9092");
-		props.put("group.id", "myGroup");
-		props.put("enable.auto.commit", "false");
+	private static KafkaConsumer<String, String> getKafkaConsumer(Properties props, boolean autoCommit) {
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+				"kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092");
+		// props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, "myGroup");
+		if (autoCommit) {
+			props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+		} else {
+			props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+		}
+		// latest none earliest
+		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 		// props.put("auto.commit.interval.ms", "1000");
 		// 每次poll方法调用都是client与server的一次心跳
-		props.put("session.timeout.ms", "30000");
+		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
 		// props.put("max.poll.records", "2");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+				"org.apache.kafka.common.serialization.StringDeserializer");
+		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+				"org.apache.kafka.common.serialization.StringDeserializer");
 		return new KafkaConsumer<String, String>(props);
 	}
 
 	public static void main(String[] args) {
 
 		Properties props = new Properties();
-		KafkaConsumer<String, String> consumer = getKafkaConsumer(props);
+		KafkaConsumer<String, String> consumer = getKafkaConsumer(props, false);
 		consumer.subscribe(Arrays.asList(KafkaProducerTest.TOPIC_NAME));
 		try {
 			while (true) {
@@ -47,11 +56,11 @@ public class KafkaLowConsumerTest {
 				for (TopicPartition partition : records.partitions()) {
 					List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
 					for (ConsumerRecord<String, String> record : partitionRecords) {
-						System.out.println(record);
-						// one by one 提交
-						long lastOffset = record.offset();
-						consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+						System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(),
+								record.value());
 					}
+					long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+					System.err.printf("lastOffset:{%s}", lastOffset);
 				}
 			}
 		} catch (Exception e) {

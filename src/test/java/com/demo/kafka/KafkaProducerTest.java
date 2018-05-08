@@ -10,11 +10,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-
 public class KafkaProducerTest {
 
-	public static final String TOPIC_NAME = "_vencano_2018_05_07";
-
+	public static final String TOPIC_NAME = "_vencano_2018-05-08";
 
 	// @formatter:off
 	/**
@@ -66,7 +64,7 @@ public class KafkaProducerTest {
 
 	public static void main(String[] args) {
 		Producer<String, String> producer = createProducer();
-		for (int j = 0; j < 100000; j++) {
+		for (int j = 0; j < 10; j++) {
 			long now = System.currentTimeMillis();
 			ProducerRecord<String, String> record = new ProducerRecord<String, String>(TOPIC_NAME,
 					now + "xiaolang" + j);
