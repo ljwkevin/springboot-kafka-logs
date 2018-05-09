@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.javaapi.consumer.ConsumerConnector;
+
 /**
  * kafka统一配置
  *
@@ -19,6 +20,8 @@ import kafka.javaapi.consumer.ConsumerConnector;
  * @date 2018-05-08
  */
 public class KafkaConfigUtils {
+
+	private static final String TEST_KAFKA_SEVERS_URL = "kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092";
 
 	private static final String TOPIE_DATE_PATTERN = "yyyy-MM-dd";
 	private static final String DEFAULT_CONSUMER_GROUP_NAME = "_sys_default_group";
@@ -35,10 +38,14 @@ public class KafkaConfigUtils {
 	public static ConsumerConnector createHighConsumer(String zkServersUrl) {
 		return createHighConsumer(DEFAULT_CONSUMER_GROUP_NAME, zkServersUrl);
 	}
+
 	/**
 	 * 配置消费者
-	 * @param groupName 分组名称
-	 * @param zkServersUrl zk服务地址,集群逗号分隔
+	 * 
+	 * @param groupName
+	 *            分组名称
+	 * @param zkServersUrl
+	 *            zk服务地址,集群逗号分隔
 	 * @return
 	 * @author fuhw/vencano
 	 */
@@ -61,12 +68,15 @@ public class KafkaConfigUtils {
 	}
 
 	public static Producer<String, String> createProducer() {
-		return createProducer(DEFAULT_KAFKA_SEVERS_URL);
+		return createProducer(
+				StringUtils.isEmpty(TEST_KAFKA_SEVERS_URL) ? DEFAULT_KAFKA_SEVERS_URL : TEST_KAFKA_SEVERS_URL);
 	}
 
 	/**
 	 * 配置生产者
-	 * @param kafkaServersUrl kafka服务地址,集群逗号分隔
+	 * 
+	 * @param kafkaServersUrl
+	 *            kafka服务地址,集群逗号分隔
 	 * @return
 	 * @author fuhw/vencano
 	 */
@@ -81,23 +91,23 @@ public class KafkaConfigUtils {
 		 * acks=all：意思是leader将等待所有同步复制broker的ack信息后返回。
 		 */
 		props.put(ProducerConfig.ACKS_CONFIG, "1");
-		// props.put(ProducerConfig.RETRIES_CONFIG, 3);
+		props.put(ProducerConfig.RETRIES_CONFIG, 0);
 		/**
 		 * 1.Specify buffer size in config
-		 * 2.10.0后product完全支持批量发送给broker，不乱你指定不同parititon，product都是批量自动发送指定parition上。
+		 * 2.10.0后product完全支持批量发送给broker，不管你指定不同parititon，product都是批量自动发送指定parition上。
 		 * 3.当batch.size达到最大值就会触发dosend机制
 		 */
-		// props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
+		props.put(ProducerConfig.BATCH_SIZE_CONFIG, 20000);
 		/**
 		 * Reduce the no of requests less than 0;意思在指定batch.size数量没有达到情况下，在5s内也回推送数据
 		 * 
 		 */
-		// props.put(ProducerConfig.LINGER_MS_CONFIG, 30000);
+		props.put(ProducerConfig.LINGER_MS_CONFIG, 5000);
 		/**
 		 * 1. The buffer.memory controls the total amount of memory available to the
 		 * producer for buffering. 2. 生产者总内存被应用缓存，压缩，及其它运算
 		 */
-		// props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
+		props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
 		// props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,

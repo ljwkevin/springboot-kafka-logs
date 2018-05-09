@@ -11,16 +11,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.ValueMapper;
 
-/**
- * 能够开发者自己控制 offset，想从哪里读取就从哪里读取。
- * 
- * 自行控制连接分区，对分区自定义进行负载均衡
- * 
- * 对 zookeeper 的依赖性降低（如：offset 不一定非要靠 zk 存储，自行存储 offset 即可，比如存在文件或者内存中）
- *
- * @author fuhw/vencano
- * @date 2018-05-07
- */
 public class KafkaStreamOutputTest {
 
 	public static void main(String[] args) throws Exception {

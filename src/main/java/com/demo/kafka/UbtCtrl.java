@@ -1,5 +1,7 @@
 package com.demo.kafka;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +24,13 @@ public class UbtCtrl {
 
 	@GetMapping("/dowork")
 	public void login() {
-		for (int i = 0; i < 10; i++) {
+		List<String> mStrings = new ArrayList<>(100000);
+		for (int i = 0; i < 100000; i++) {
 			try {
-				LogsToKafkaService
-						.produce(mapper.writeValueAsString(new TempEvent(UUID.randomUUID().toString(), i + "")));
+				mStrings.add(mapper.writeValueAsString(new TempEvent(UUID.randomUUID().toString(), i + "")));
 			} catch (JsonProcessingException e) {
 			}
 		}
+		LogsToKafkaService.produceBatchByDirect(mStrings);
 	}
-
 }

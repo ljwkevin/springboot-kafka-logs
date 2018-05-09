@@ -23,8 +23,7 @@ public class KafkaAppender<E> extends AppenderBase<E> {
 	public void start() {
 		Assert.notNull(layout, "you don't set the layout of KafkaAppender");
 		super.start();
-		this.producer = KafkaConfigUtils
-				.createProducer("kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092");
+		this.producer = KafkaConfigUtils.createProducer();
 	}
 
 	@Override

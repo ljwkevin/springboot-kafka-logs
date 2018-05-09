@@ -1,6 +1,6 @@
 package com.demo.kafka;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,13 +28,14 @@ public class KafkaHighConsumerTest {
 
 	public static void main(String[] args) {
 		int msgCount = 0;
-		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-		topicCountMap.put(KafkaConfigUtils.DEFAULT_TOPIC_NAME, 1);
 		String zkServersUrl = "zk1.test.tuboshi.co:2181,zk2.test.tuboshi.co:2181,zk3.test.tuboshi.co:2181";
 		ConsumerConnector consumer = KafkaConfigUtils.createHighConsumer(zkServersUrl);
-		Map<String, List<KafkaStream<byte[], byte[]>>> messageSteam = consumer.createMessageStreams(topicCountMap);
-		KafkaStream<byte[], byte[]> steam = messageSteam.get(KafkaConfigUtils.DEFAULT_TOPIC_NAME).get(0);
-		ConsumerIterator<byte[], byte[]> iterator = steam.iterator();
+		
+		Map<String, List<KafkaStream<byte[], byte[]>>> messageSteam = consumer
+				.createMessageStreams(Collections.singletonMap(KafkaConfigUtils.DEFAULT_TOPIC_NAME, 1));
+		
+		KafkaStream<byte[], byte[]> stream = messageSteam.get(KafkaConfigUtils.DEFAULT_TOPIC_NAME).get(0);
+		ConsumerIterator<byte[], byte[]> iterator = stream.iterator();
 		while (iterator.hasNext()) {
 			String message = new String(iterator.next().message());
 			msgCount++;

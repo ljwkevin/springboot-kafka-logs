@@ -3,6 +3,8 @@ package com.demo.kafka;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,11 +24,12 @@ import org.apache.kafka.common.TopicPartition;
  */
 public class KafkaLowConsumerTest {
 
-	private static KafkaConsumer<String, String> getKafkaConsumer(Properties props, boolean autoCommit) {
+	private static KafkaConsumer<String, String> getKafkaConsumer(String groupName, boolean autoCommit) {
+		Properties props = new Properties();
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupName);
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
 				"kfk1.test.tuboshi.co:9092,kfk2.test.tuboshi.co:9092,kfk3.test.tuboshi.co:9092");
 		// props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, "myGroup");
 		if (autoCommit) {
 			props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
 		} else {
@@ -46,21 +49,29 @@ public class KafkaLowConsumerTest {
 	}
 
 	public static void main(String[] args) {
+		ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(3);
+		newFixedThreadPool.execute(() -> consumerMsg("group1"));
+		newFixedThreadPool.execute(() -> consumerMsg("group2"));
 
-		Properties props = new Properties();
-		KafkaConsumer<String, String> consumer = getKafkaConsumer(props, false);
+	}
+
+	private static void consumerMsg(String groupName) {
+		KafkaConsumer<String, String> consumer = getKafkaConsumer(groupName, true);
 		consumer.subscribe(Arrays.asList(KafkaConfigUtils.DEFAULT_TOPIC_NAME));
 		try {
 			while (true) {
+
 				ConsumerRecords<String, String> records = consumer.poll(100);
 				for (TopicPartition partition : records.partitions()) {
+
+					// 指定到上次的offset偏移量consumer.seek(partition, lastOffset);
 					List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
 					for (ConsumerRecord<String, String> record : partitionRecords) {
 						System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(),
 								record.value());
 					}
 					long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
-					System.err.printf("lastOffset:{%s}", lastOffset);
+					System.out.printf("[parttion:{%s}][groupName:{%s}]lastOffset:{%s}",partition.toString(), groupName, lastOffset);
 				}
 			}
 		} catch (Exception e) {
